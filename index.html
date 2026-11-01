@@ -32,9 +32,9 @@
             z-index: 9999;
         }
     </style>
-    <!-- Relative system hooks -->
-    <script src="/uv/uv.config.js"></script>
-    <script src="/uv/uv.bundle.js"></script>
+    <!-- Script dependencies -->
+    <script src="/uv/uv.config.js" defer></script>
+    <script src="/uv/uv.bundle.js" defer></script>
 </head>
 <body>
 
@@ -52,48 +52,57 @@
     <iframe id="viewer-frame"></iframe>
 
     <script>
-        const input = document.getElementById("url");
-        const button = document.getElementById("open");
-        const status = document.getElementById("status");
-        const mainUi = document.getElementById("main-ui");
-        const iframe = document.getElementById("viewer-frame");
+        // Wrap everything inside a load listener to guarantee scripts are defined
+        window.addEventListener('load', () => {
+            const input = document.getElementById("url");
+            const button = document.getElementById("open");
+            const status = document.getElementById("status");
+            const mainUi = document.getElementById("main-ui");
+            const iframe = document.getElementById("viewer-frame");
 
-        // Force register the internal service worker within its own local origin context
-        async function registerEngine() {
-            if ('serviceWorker' in navigator) {
-                try {
-                    await navigator.serviceWorker.register('/uv/uv.sw.js', {
-                        scope: __uv$config.prefix
-                    });
-                    status.textContent = "Engine Ready.";
-                } catch (err) {
-                    status.textContent = "Initialization failed: " + err.message;
+            async function registerEngine() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        // Double check that the variable is ready before proceeding
+                        if (typeof __uv$config === 'undefined') {
+                            throw new Error("Configuration assets still buffering. Refreshing...");
+                        }
+
+                        await navigator.serviceWorker.register('/uv/uv.sw.js', {
+                            scope: __uv$config.prefix
+                        });
+                        status.textContent = "Engine Ready.";
+                    } catch (err) {
+                        status.textContent = "Initialization failed: " + err.message;
+                        status.style.color = "#ff4a4a";
+                    }
+                } else {
+                    status.textContent = "Unsupported browser environment.";
                 }
-            } else {
-                status.textContent = "Unsupported browser environment.";
             }
-        }
 
-        registerEngine();
+            registerEngine();
 
-        function openWebsite() {
-            let url = input.value.trim();
-            if (!url) return;
-            if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+            function openWebsite() {
+                let url = input.value.trim();
+                if (!url) return;
+                if (!/^https?:\/\//i.test(url)) url = "https://" + url;
 
-            status.textContent = "Connecting to sandbox proxy routing...";
+                status.style.color = "#00ca4e";
+                status.textContent = "Connecting to sandbox proxy routing...";
 
-            // Compile target address using the loaded configuration rules
-            const proxyUrl = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(url);
-            
-            // Unhide the fullscreen view layer and inject target
-            mainUi.style.opacity = "0";
-            iframe.style.display = "block";
-            iframe.src = proxyUrl;
-        }
+                // Compile target address using the loaded configuration rules
+                const proxyUrl = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(url);
+                
+                // Unhide the fullscreen view layer and inject target
+                mainUi.style.opacity = "0";
+                iframe.style.display = "block";
+                iframe.src = proxyUrl;
+            }
 
-        button.addEventListener("click", openWebsite);
-        input.addEventListener("keydown", (e) => { if (e.key === "Enter") openWebsite(); });
+            button.addEventListener("click", openWebsite);
+            input.addEventListener("keydown", (e) => { if (e.key === "Enter") openWebsite(); });
+        });
     </script>
 </body>
 </html>
