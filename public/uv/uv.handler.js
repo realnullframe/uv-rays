@@ -1,3 +1,2 @@
-// Ultraviolet Client-side Request Handler Hook
-importScripts('/uv/uv.bundle.js');
-// Standard worker routing distribution
+// Route execution pathways cleanly through the global library bundle
+importScripts('https://jsdelivr.net');
