@@ -9,20 +9,20 @@ const server = http.createServer();
 const app = express();
 const bareServer = createBareServer('/bare/');
 
-// Explicitly route requests for uv.config.js to your repository's file
+// Explicitly route requests for uv.config.js to your repository's local configuration file
 app.get('/uv/uv.config.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'uv.config.js'));
 });
 
-// Serve the remaining vendor compiled assets natively
+// Serve the remaining internal Ultraviolet library assets natively
 app.use('/uv/', express.static(uvPath));
 
-// Deliver the index.html frontend interface dashboard
+// Deliver the index.html user dashboard layout when hitting the root domain route
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Intercept routing logic to pass requests to the Bare server backend
+// Intercept standard routing streams to pass network requests to the Bare server backend
 server.on('request', (req, res) => {
     if (bareServer.shouldRoute(req)) {
         bareServer.routeRequest(req, res);
@@ -31,7 +31,7 @@ server.on('request', (req, res) => {
     }
 });
 
-// Upgrade requests (WebSocket support for complex web apps/games)
+// Upgrade incoming network streams (WebSocket support for real-time web apps and games)
 server.on('upgrade', (req, socket, head) => {
     if (bareServer.shouldRoute(req)) {
         bareServer.routeUpgrade(req, socket, head);
@@ -40,7 +40,7 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
-// Dynamically bind to the environment port assigned by Render
+// Dynamically bind to the environment port layout assigned by Render
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
