@@ -9,7 +9,10 @@ const server = http.createServer();
 const app = express();
 const bareServer = createBareServer('/bare/');
 
-// Serve Ultraviolet frontend distribution scripts
+// 1. Force the custom uv.config.js from your repo to overwrite the module default
+app.use('/uv/uv.config.js', express.static(path.join(__dirname, 'uv.config.js')));
+
+// Serve the rest of the Ultraviolet frontend distribution scripts
 app.use('/uv/', express.static(uvPath));
 
 // Fail-safe handling for static routing
