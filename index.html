@@ -10,51 +10,86 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #121212; color: #ffffff; margin: 0;
             display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+            overflow: hidden;
         }
-        .container { text-align: center; width: 100%; max-width: 500px; padding: 20px; }
+        .container { text-align: center; width: 100%; max-width: 500px; padding: 20px; transition: opacity 0.3s; }
         h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.05em; }
         p { color: #888888; margin-bottom: 30px; }
         .search-box { display: flex; gap: 10px; width: 100%; background: #1e1e1e; padding: 8px; border-radius: 12px; border: 1px solid #333333; }
         input { flex: 1; background: transparent; border: none; color: #ffffff; font-size: 1rem; padding: 8px 12px; outline: none; }
         button { background-color: #ffffff; color: #000000; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
         #status { margin-top: 20px; font-size: 0.85rem; color: #00ca4e; min-height: 20px; }
+        
+        /* Fullscreen viewer that stays invisible until a site opens */
+        #viewer-frame {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            z-index: 9999;
+        }
     </style>
-    <!-- Relative paths work perfectly now because they are on the same server! -->
+    <!-- Relative system hooks -->
     <script src="/uv/uv.config.js"></script>
     <script src="/uv/uv.bundle.js"></script>
 </head>
 <body>
-    <div class="container">
+
+    <div class="container" id="main-ui">
         <h1>Blank Browser</h1>
         <p>Chromebook Edition</p>
         <div class="search-box">
             <input type="text" id="url" placeholder="Enter a website URL (e.g., google.com)">
             <button id="open">OPEN</button>
         </div>
-        <div id="status">Ready.</div>
+        <div id="status">Initializing engine...</div>
     </div>
+
+    <!-- The native rendering frame -->
+    <iframe id="viewer-frame"></iframe>
+
     <script>
         const input = document.getElementById("url");
         const button = document.getElementById("open");
         const status = document.getElementById("status");
+        const mainUi = document.getElementById("main-ui");
+        const iframe = document.getElementById("viewer-frame");
+
+        // Force register the internal service worker within its own local origin context
+        async function registerEngine() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('/uv/uv.sw.js', {
+                        scope: __uv$config.prefix
+                    });
+                    status.textContent = "Engine Ready.";
+                } catch (err) {
+                    status.textContent = "Initialization failed: " + err.message;
+                }
+            } else {
+                status.textContent = "Unsupported browser environment.";
+            }
+        }
+
+        registerEngine();
 
         function openWebsite() {
             let url = input.value.trim();
             if (!url) return;
             if (!/^https?:\/\//i.test(url)) url = "https://" + url;
 
-            const tab = window.open("about:blank", "_blank");
-            if (!tab) { status.textContent = "Popup blocked!"; return; }
+            status.textContent = "Connecting to sandbox proxy routing...";
 
+            // Compile target address using the loaded configuration rules
             const proxyUrl = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(url);
             
-            const iframe = tab.document.createElement("iframe");
+            // Unhide the fullscreen view layer and inject target
+            mainUi.style.opacity = "0";
+            iframe.style.display = "block";
             iframe.src = proxyUrl;
-            iframe.style.cssText = "position:fixed; inset:0; width:100%; height:100%; border:none; margin:0; padding:0;";
-            
-            tab.document.body.style.margin = "0";
-            tab.document.body.appendChild(iframe);
-            tab.document.title = "about:blank";
         }
 
         button.addEventListener("click", openWebsite);
