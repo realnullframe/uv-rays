@@ -1,4 +1,4 @@
-import createBareServer from '@tomphttp/bare-server-node';
+import { createBareServer } from '@tomphttp/bare-server-node';
 import express from 'express';
 import http from 'node:http';
 import { uvPath } from '@titaniumnetwork-dev/ultraviolet';
