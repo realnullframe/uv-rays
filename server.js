@@ -9,11 +9,16 @@ const server = http.createServer();
 const app = express();
 const bareServer = createBareServer('/bare/');
 
-// Prioritize files in your repository's local public/uv folder first
-app.use('/uv/', express.static(path.join(__dirname, 'public', 'uv')));
+// Explicitly route requests for uv.config.js to your repository's root file
+app.get('/uv/uv.config.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'uv.config.js'));
+});
 
-// Fallback to internal library components if not present locally
+// Fallback vendor compiler path to natively serve bundles, sw, and handlers
 app.use('/uv/', express.static(uvPath));
+
+// Prioritize files in your repository's local public/uv folder second
+app.use('/uv/', express.static(path.join(__dirname, 'public', 'uv')));
 
 // Deliver the index.html frontend interface dashboard
 app.get('/', (req, res) => {
