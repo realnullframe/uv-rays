@@ -1,6 +1,7 @@
-importScripts('./uv.bundle.js');
-importScripts('./uv.handler.js');
-importScripts('./uv.config.js');
+// Force the Service Worker to import the fully compiled library bundle directly
+importScripts('https://jsdelivr.net');
+importScripts('/uv/uv.handler.js');
+importScripts('/uv/uv.config.js');
 
 const sw = new UVServiceWorker();
 
