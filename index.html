@@ -32,7 +32,7 @@
             z-index: 9999;
         }
     </style>
-    <!-- Script dependencies -->
+    <!-- Relative dependency script compilation hooks -->
     <script src="/uv/uv.config.js" defer></script>
     <script src="/uv/uv.bundle.js" defer></script>
 </head>
@@ -48,7 +48,7 @@
         <div id="status">Initializing engine...</div>
     </div>
 
-    <!-- The native rendering frame -->
+    <!-- The native rendering frame canvas -->
     <iframe id="viewer-frame"></iframe>
 
     <script>
@@ -63,7 +63,7 @@
             async function registerEngine() {
                 if ('serviceWorker' in navigator) {
                     try {
-                        // Double check that the variable is ready before proceeding
+                        // Confirm that the configuration variables are buffered before launching registrar hooks
                         if (typeof __uv$config === 'undefined') {
                             throw new Error("Configuration assets still buffering. Refreshing...");
                         }
@@ -94,7 +94,7 @@
                 // Compile target address using the loaded configuration rules
                 const proxyUrl = window.location.origin + __uv$config.prefix + __uv$config.encodeUrl(url);
                 
-                // Unhide the fullscreen view layer and inject target
+                // Hide home UI element cards and unhide full screen frame viewport
                 mainUi.style.opacity = "0";
                 iframe.style.display = "block";
                 iframe.src = proxyUrl;
