@@ -1,7 +1,7 @@
 {
   "name": "uv-rays",
   "version": "1.0.0",
-  "description": "Ultraviolet backend wrapper",
+  "description": "Ultraviolet backend proxy wrapper",
   "main": "server.js",
   "type": "module",
   "scripts": {
