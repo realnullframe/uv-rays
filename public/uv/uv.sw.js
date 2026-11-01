@@ -1,18 +1,10 @@
-// Pull verified compiled scripts directly from the official web delivery network
-importScripts('https://jsdelivr.net');
-importScripts('https://jsdelivr.net');
+/*globals __uv$config*/
+// Force standard vendor script evaluation pipelines
+importScripts('/uv/uv.bundle.js');
+importScripts('/uv/uv.config.js');
 
-// Minimal script backup in case your root config isn't read by the worker frame context
-if (!self.__uv$config) {
-    self.__uv$config = {
-        prefix: '/uv/service/',
-        bare: '/bare/',
-        encodeUrl: function(url) { return btoa(url).replace(/=/g, ''); },
-        decodeUrl: function(str) { return atob(str); }
-    };
-}
-
-const sw = new UVServiceWorker();
+// Ultraviolet naturally populates a self.UVServiceWorker instance during bundle execution
+const sw = new self.UVServiceWorker(__uv$config);
 
 self.addEventListener('fetch', (event) => {
     event.respondWith(sw.fetch(event));
