@@ -9,10 +9,15 @@ const server = http.createServer();
 const app = express();
 const bareServer = createBareServer('/bare/');
 
-// Serve all Ultraviolet frontend distribution scripts natively
+// Explicitly route requests for uv.config.js to your repository's file
+app.get('/uv/uv.config.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'uv.config.js'));
+});
+
+// Serve the remaining vendor compiled assets natively
 app.use('/uv/', express.static(uvPath));
 
-// Serve your index.html frontend file natively on the home page
+// Deliver the index.html frontend interface dashboard
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
