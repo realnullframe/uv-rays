@@ -9,14 +9,15 @@ const server = http.createServer();
 const app = express();
 const bareServer = createBareServer('/bare/');
 
-app.use('/uv/uv.config.js', express.static(path.join(__dirname, 'uv.config.js')));
+// Serve all Ultraviolet frontend distribution scripts natively
 app.use('/uv/', express.static(uvPath));
 
-// CHANGE THIS BLOCK: Serve the index.html frontend file natively 
+// Serve your index.html frontend file natively on the home page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Intercept routing logic to pass requests to the Bare server backend
 server.on('request', (req, res) => {
     if (bareServer.shouldRoute(req)) {
         bareServer.routeRequest(req, res);
@@ -25,6 +26,7 @@ server.on('request', (req, res) => {
     }
 });
 
+// Upgrade requests (WebSocket support for complex web apps/games)
 server.on('upgrade', (req, socket, head) => {
     if (bareServer.shouldRoute(req)) {
         bareServer.routeUpgrade(req, socket, head);
@@ -33,7 +35,9 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
+// Dynamically bind to the environment port assigned by Render
 const PORT = process.env.PORT || 3000;
+
 server.listen(PORT, () => {
     console.log(`Ultraviolet server listening on port ${PORT}`);
 });
